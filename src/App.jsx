@@ -7,16 +7,25 @@ import "./App.css";
 import { useEffect, useState } from "react";
 
 function App() {
-  const [contacts, setContacts] = useState(contactsData);
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem("savedContacts");
+    return savedContacts ? JSON.parse(savedContacts) : contactsData;
+  });
+
   const [contactValue, setContactValue] = useState("");
+
   const [clicks, setClicks] = useState(() => {
     const savedClicks = localStorage.getItem("savedClicks");
     return savedClicks !== null ? JSON.parse(savedClicks) : 0;
   });
 
   useEffect(() => {
-    localStorage.setItem("saved-clicks", JSON.stringify(clicks));
+    localStorage.setItem("savedClicks", JSON.stringify(clicks));
   }, [clicks]);
+
+  useEffect(() => {
+    localStorage.setItem("savedContacts", JSON.stringify(contacts));
+  }, [contacts]);
 
   const handleDeleteContacts = (id) => {
     const newData = contacts.filter((contactsData) => contactsData.id !== id);
@@ -31,6 +40,11 @@ function App() {
     };
     setContacts([...contacts, newContact]);
   };
+
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(contactValue.toLowerCase())
+  );
+
   return (
     <div>
       <h1 className="title">Phonebook</h1>
@@ -45,8 +59,9 @@ function App() {
         setContactValue={setContactValue}
       />
       <ContactList
-        contacts={contacts}
+        // contacts={contacts}
         handleDeleteContacts={handleDeleteContacts}
+        contacts={filteredContacts}
       />
     </div>
   );
